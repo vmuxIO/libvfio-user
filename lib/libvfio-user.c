@@ -1898,6 +1898,12 @@ vfu_setup_region(vfu_ctx_t *vfu_ctx, int region_idx, size_t size,
         return ERROR_INT(EINVAL);
     }
 
+    if (!(flags & VFU_REGION_FLAG_MEM) && (size >= (1 << 16))) {
+        // qemu for example hangs before boot in some cases if this constraint is not respected
+        vfu_log(vfu_ctx, LOG_ERR, "pio bars must be smaller than 2^16 (VFU_REGION_FLAG_MEM missing)");
+        return ERROR_INT(EINVAL);
+    }
+
     if ((mmap_areas == NULL) != (nr_mmap_areas == 0) ||
         (mmap_areas != NULL && fd == -1)) {
         vfu_log(vfu_ctx, LOG_ERR, "invalid mappable region arguments");
